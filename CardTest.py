@@ -7,6 +7,16 @@ class TestCard(TestCase):
         self.suit = 'hearts'
 
 
-
     def test_checkRed(self):
-        pass
+        self.value = '2'
+        self.suit = 'hearts'
+        print(f"{self.suit}, {Card.isRed(self)}")
+
+        self.suit = 'clubs'
+        print(f"{self.suit}, {Card.isRed(self)}")
+
+        self.suit = 'diamonds'
+        print(f"{self.suit}, {Card.isRed(self)}")
+
+        self.suit = 'spades'
+        print(f"{self.suit}, {Card.isRed(self)}")
