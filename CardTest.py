@@ -1,22 +1,12 @@
-from unittest import TestCase
 from main import Card
+import pytest
 
-class TestCard(TestCase):
-    def test_create(self):
-        self.value = 'A'
-        self.suit = 'hearts'
+def test_isred_1():
+    card1 = Card(2, "hearts")
+    card2 = Card(2, "spades")
+    assert Card.isRed(card1) == True
+    assert Card.isRed(card2) == False
 
-
-    def test_checkRed(self):
-        self.value = '2'
-        self.suit = 'hearts'
-        print(f"{self.suit}, {Card.isRed(self)}")
-
-        self.suit = 'clubs'
-        print(f"{self.suit}, {Card.isRed(self)}")
-
-        self.suit = 'diamonds'
-        print(f"{self.suit}, {Card.isRed(self)}")
-
-        self.suit = 'spades'
-        print(f"{self.suit}, {Card.isRed(self)}")
+def test_printcards():
+    card1 = Card(2, "hearts")
+    card2 = Card(2, "spades")
