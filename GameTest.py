@@ -1,12 +1,10 @@
 import pytest
 
-from main import Card
-from main import Board
-
+from main import *
 
 @pytest.fixture
 def board():
-    return Board()
+    return Board(CreateDeck())
 
 def test_printcards(board):
-    assert board.printcards() == []
+    assert display(board)

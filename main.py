@@ -22,8 +22,9 @@ class Board:
         wastepile = [[]]
         face = [[] for i in range(7)]
 
-        def __init__(self, tableau):
-            self.tableau = tableau
+        def __init__(self, deck):
+            self.deck = deck
+            self.tableau = [[deck.pop() for x in range(i + 1)] for i in range(7)]
 
 def IsCompatible(Card1, Card2):
     if Card.isRed(Card1) ^ Card.isRed(Card2) and Card.values(Card1).index(Card1.value) == (Card.values(Card2).index(Card2.value))+1:
@@ -49,13 +50,13 @@ def turn(board):
             board.face[i].append(board.tableau[i].pop())
     return(board)
 
-def draw(board, deck):
-    if len(deck) > 0:
-        board.wastepile.append(deck.pop())
+def draw(board):
+    if len(board.deck) > 0:
+        board.wastepile.append(board.deck.pop())
     else:
         deck = board.wastepile[::-1]
         board.wastepile = [[]]
-    return[board, deck]
+    return board
 
 def moveOne(board):
     try: colin = int(input("from: "))
@@ -82,12 +83,11 @@ def moveOne(board):
         return board
 
 
-# deck = CreateDeck()
-# board = Board([[deck.pop() for x in range(i + 1)] for i in range(7)])
+# board = Board(CreateDeck())
 # board = turn(board)
 # display(board)
-# board, deck = draw(board, deck)
-#
+# board= draw(board)
+
 # while True:
 #     board, deck = draw(board, deck)
 #     board = turn(board)
