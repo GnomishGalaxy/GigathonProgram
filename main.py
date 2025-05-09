@@ -14,17 +14,13 @@ class Card:
     def __init__(self, value, suit):
         self.value = value
         self.suit = suit
+        self.numvalue = Card.values(self).index(self.value)
 
     def __repr__(self):
         return f"({self.value}, {self.sigils()[self.suits().index(self.suit)]})"
 
-    def isRed(self):
-        if self.suits().index(self.suit) < 2:
-            return True
-        else:
-            return False
-
-
+    def __str__(self):
+        return f"({self.value}, {self.sigils()[self.suits().index(self.suit)]})"
 
 class Board:
     foundation = [[] for i in range(4)]
@@ -35,14 +31,23 @@ class Board:
         self.deck = deck
         self.tableau = [[deck.pop() for x in range(i + 1)] for i in range(7)]
 
-
-def IsCompatible(Card1, Card2):
-    if Card.isRed(Card1) ^ Card.isRed(Card2) and Card.values(Card1).index(Card1.value) == (
-            Card.values(Card2).index(Card2.value)) + 1:
+def isRed(card):
+    if card.suits().index(card.suit) < 2:
         return True
     else:
         return False
 
+def IsCompatible(Card1, Card2):
+    if isRed(Card1) ^ isRed(Card2) and Card1.numvalue == Card2.numvalue + 1:
+        return True
+    else:
+        return False
+
+def IsFoundationCompatible(Card1, Card2):
+    if Card1.suit == Card2.suit and Card1.numvalue + 1 == Card2.numvalue:
+        return True
+    else:
+        return False
 
 def CreateDeck():
     deck = [Card(value, suit) for value in Card.values(Card) for suit in Card.suits(Card)]
@@ -88,17 +93,37 @@ def moveOne(board, colin, colout):
     if colin < -4 or colin > 7 or colout > 7 or colout < -4 or colout == 0: return False
     #   0 = wastepile, -4 -> -1 = foundation, 1 -> 7 = tableau
     if colin == 0:  #    from the wastepile
-        cardin = board.wastepile.pop
+        if board.wastepile[-1] == Card:
+            cardin = board.wastepile.pop()
+        else: return False
     if colin < 0:  #     from the foundation
-        cardin = board.foundation[abs(colin)-1].pop
+        cardin = board.foundation[abs(colin)-1].pop()
     if colin > 0:  #     from the tableau
-        cardin = board.tableau[colin - 1].pop
+        cardin = board.face[colin - 1].pop()
+
+    print(cardin)
+
+    if cardin.value == "K":
+        if board.face[colout-1] == []:
+            board.face[colout - 1].append(cardin)
+            return board
+        else: return False
+
+    elif board.face[colout-1] == []:
+            return False
 
     if colout > 0:
-        if IsCompatible(board.tableau[colout-1][-1], cardin):
-            board.tableau[colout-1].append(cardin)
+        if IsCompatible(board.face[colout-1][-1], cardin):
+            board.face[colout-1].append(cardin)
         else:
             return False
+    if colout < 0:
+        if IsFoundationCompatible(board.foundation[abs(colout)-1][-1], cardin):
+            board.foundation[abs(colout)-1].append(cardin)
+        else:
+            return False
+
+    return board
 
 # board = Board(CreateDeck())
 # board = turn(board)

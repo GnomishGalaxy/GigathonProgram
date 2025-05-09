@@ -37,19 +37,34 @@ def test_compatibility():
 def test_pop2(board):
     assert len(board.deck) == 24
 
+
+@pytest.fixture2
+def board():
+    return Board(CreateDeck())
+random.seed(6)
+
 def test_move(board):
+    board = turn(board)
     assert not moveOne(board, "lorem", "ipsum")
     assert not moveOne(board, 1, 50)
     assert not moveOne(board, -50, 1)
     assert not moveOne(board, 2, 0)
     assert not moveOne(board, 0, 1)
 
-    board = moveOne(board, 4, 3)
-    assert (board.tableau[2][-1].suit == "diamonds"
-            and board.tableau[2][-1].suit == "3")
 
-    board.tableau[7] = []
-    board = moveOne(board, 1, 7)
-    assert (board.tableau[6][-1].suit == "spades"
-            and board.tableau[6][-1].suit == "K")
+    board = moveOne(board, 2, 7)
+    turn(board)
+    assert (board.face[6][-1].suit == "hearts"
+            and board.face[6][-1].value == "2")
 
+    board.face[1] = []
+
+    board = moveOne(board, 1, 2)
+    assert (board.face[1][-1].suit == "spades"
+            and board.face[1][-1].value == "K")
+
+
+def test_checking(board):
+    board = turn(board)
+    cardin = board.face[1].pop()
+    print(cardin)
