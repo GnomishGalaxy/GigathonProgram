@@ -1,6 +1,7 @@
 import random
 import pprint
 
+
 class Card:
     def values(self):
         return ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K']
@@ -22,6 +23,7 @@ class Card:
     def __str__(self):
         return f"({self.value}, {self.sigils()[self.suits().index(self.suit)]})"
 
+
 class Board:
     foundation = [[] for i in range(4)]
     wastepile = [[]]
@@ -31,11 +33,13 @@ class Board:
         self.deck = deck
         self.tableau = [[deck.pop() for x in range(i + 1)] for i in range(7)]
 
+
 def isRed(card):
     if card.suits().index(card.suit) < 2:
         return True
     else:
         return False
+
 
 def IsCompatible(Card1, Card2):
     if isRed(Card1) ^ isRed(Card2) and Card1.numvalue == Card2.numvalue + 1:
@@ -43,7 +47,8 @@ def IsCompatible(Card1, Card2):
     else:
         return False
 
-def IsFoundationCompatible(Card1, Card2 = 0):
+
+def IsFoundationCompatible(Card1, Card2=0):
     if Card2 == 0:
         if Card1.numvalue == 1:
             return True
@@ -54,6 +59,7 @@ def IsFoundationCompatible(Card1, Card2 = 0):
         return True
     else:
         return False
+
 
 def CreateDeck():
     deck = [Card(value, suit) for value in Card.values(Card) for suit in Card.suits(Card)]
@@ -86,53 +92,66 @@ def draw(board):
     return board
 
 
-def move(board, colin, colout, amount = 1):
-    try:
-        colin = int(colin)
-    except:
+class EmptyWastepileException(Exception):
+    pass
+
+
+class ColoutZeroException(Exception):
+    pass
+
+
+def move(board, colin, colout, amount=1):
+    colin = int(colin)
+    colout = int(colout)
+
+    if colin not in range(-4, 8):
         return False
-    try:
-        colout = int(colout)
-    except:
+    if colout not in range(-4, 8):
+        return False
+    if colout == 0:
+        raise ColoutZeroException()
+    if colin < 1 < amount:
         return False
 
-    if colin < -4 or colin > 7 or colout > 7 or colout < -4 or colout == 0: return "boog"
-    if colin < 1 and amount > 1: return "boog"
+    cardin = None
 
     #   0 = wastepile, -4 -> -1 = foundation, 1 -> 7 = tableau
     if colin == 0:  #    from the wastepile
-        if board.wastepile != []:
-            cardin = board.wastepile.pop()
-        else:
-            return "Sloog"
+        if not board.wastepile:
+            raise EmptyWastepileException()
+
+        cardin = board.wastepile.pop()
+
     if colin < 0:  #     from the foundation
-        try:
-            cardin = board.foundation[abs(colin)-1].pop()
-        except: return "Slag"
+        cardin = board.foundation[abs(colin) - 1].pop()
+
     if colin > 0:  #     from the tableau
-        try:
-            cardin = board.face[colin - 1].pop()
-        except: return "slonk"
+        cardin = board.face[colin - 1].pop()
 
     if colout > 0:
-        if cardin.value == "K":
-            if board.face[colout - 1] == []:
-                board.face[colout - 1].append(cardin)
-                return board
-            else:
-                return False
-        elif board.face[colout - 1] == []:
+        if cardin.value != "K" and board.face[colout - 1] == []:
             return False
 
-        if IsCompatible(board.face[colout-1][-1], cardin):
-            board.face[colout-1].append(cardin)
-        else:
+        if cardin.value == "K" and board.face[colout - 1] != []:
             return False
+
+        if cardin.value == "K":
+            board.face[colout - 1].append(cardin)
+            return board
+
+        if not IsCompatible(board.face[colout - 1][-1], cardin):
+            return False
+
+        board.face[colout - 1].append(cardin)
+
     if colout < 0:
-        if IsFoundationCompatible(cardin, board.foundation[abs(colout)-1][-1]):
-            board.foundation[abs(colout)-1].append(cardin)
+
+        par = board.foundation[abs(colout) - 1][-1] if not board.foundation[abs(colout) - 1] else 0
+
+        if IsFoundationCompatible(cardin, par):
+            board.foundation[abs(colout) - 1].append(cardin)
         else:
-            return False
+            return str(cardin)
 
     return board
 

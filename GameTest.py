@@ -45,10 +45,12 @@ def board():
 
 def test_move_fail(board):
     board = turn(board)
-    assert not move(board, "lorem", "ipsum")
+    with pytest.raises(ValueError):
+        move(board, "lorem", "ipsum")
     assert not move(board, 1, 50)
     assert not move(board, -50, 1)
-    assert not move(board, 2, 0)
+    with pytest.raises(ColoutZeroException):
+        move(board, 2, 0)
     assert not move(board, 0, 1)
     board.face[0] = []
     assert not move(board, 1, 2)
@@ -75,8 +77,11 @@ def test_move_wastepile(board):
     assert board.face[3][-1].value == "9"
 
 def test_move_foundation(board):
-    board = turn(board)
-    board = move(board, 1, -4)
+    for i in range(6):
+        board = draw(board)
     display(board)
-    assert board.foundation[3][-1].suit == "spades"
-    assert board.foundation[3][-1].value == "9"
+    board = turn(board)
+    board = move(board, 0, -4)
+    display(board)
+    assert board.foundation[3][-1].suit == "clubs"
+    assert board.foundation[3][-1].value == "A"
