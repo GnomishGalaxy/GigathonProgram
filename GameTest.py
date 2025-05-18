@@ -4,8 +4,9 @@ from main import *
 
 @pytest.fixture
 def board():
+    random.seed(6)
     return Board(CreateDeck())
-random.seed(6)
+
 
 def test_printcards(board):
     assert (board.deck[-1].suit == "spades"
@@ -21,9 +22,8 @@ def test_turn(board):
 
 def test_draw_wastepile(board):
     board = draw(board)
-    assert (board.wastepile[-1].suit == "clubs"
-        and board.wastepile[-1].value == "4")
-    display(board)
+    assert (board.wastepile[-1].suit == "spades"
+        and board.wastepile[-1].value == "9")
 
 def test_compatibility():
     card1 = Card("2", "hearts")
@@ -38,33 +38,45 @@ def test_pop2(board):
     assert len(board.deck) == 24
 
 
-@pytest.fixture2
+@pytest.fixture
 def board():
+    random.seed(6)
     return Board(CreateDeck())
-random.seed(6)
+
+def test_move_fail(board):
+    board = turn(board)
+    assert not move(board, "lorem", "ipsum")
+    assert not move(board, 1, 50)
+    assert not move(board, -50, 1)
+    assert not move(board, 2, 0)
+    assert not move(board, 0, 1)
+    board.face[0] = []
+    assert not move(board, 1, 2)
 
 def test_move(board):
     board = turn(board)
-    assert not moveOne(board, "lorem", "ipsum")
-    assert not moveOne(board, 1, 50)
-    assert not moveOne(board, -50, 1)
-    assert not moveOne(board, 2, 0)
-    assert not moveOne(board, 0, 1)
-
-
-    board = moveOne(board, 2, 7)
-    turn(board)
+    board = move(board, 2, 7)
     assert (board.face[6][-1].suit == "hearts"
             and board.face[6][-1].value == "2")
 
+def test_move_king(board):
+    board = turn(board)
     board.face[1] = []
 
-    board = moveOne(board, 1, 2)
+    board = move(board, 1, 2)
     assert (board.face[1][-1].suit == "spades"
             and board.face[1][-1].value == "K")
 
-
-def test_checking(board):
+def test_move_wastepile(board):
     board = turn(board)
-    cardin = board.face[1].pop()
-    print(cardin)
+    board = draw(board)
+    board = move(board, 0, 4)
+    assert board.face[3][-1].suit == "spades"
+    assert board.face[3][-1].value == "9"
+
+def test_move_foundation(board):
+    board = turn(board)
+    board = move(board, 1, -4)
+    display(board)
+    assert board.foundation[3][-1].suit == "spades"
+    assert board.foundation[3][-1].value == "9"

@@ -43,7 +43,13 @@ def IsCompatible(Card1, Card2):
     else:
         return False
 
-def IsFoundationCompatible(Card1, Card2):
+def IsFoundationCompatible(Card1, Card2 = 0):
+    if Card2 == 0:
+        if Card1.numvalue == 1:
+            return True
+        else:
+            return False
+
     if Card1.suit == Card2.suit and Card1.numvalue + 1 == Card2.numvalue:
         return True
     else:
@@ -75,12 +81,12 @@ def draw(board):
     if len(board.deck) > 0:
         board.wastepile.append(board.deck.pop())
     else:
-        deck = board.wastepile[::-1]
+        board.deck = board.wastepile[::-1]
         board.wastepile = [[]]
     return board
 
 
-def moveOne(board, colin, colout):
+def move(board, colin, colout, amount = 1):
     try:
         colin = int(colin)
     except:
@@ -90,35 +96,40 @@ def moveOne(board, colin, colout):
     except:
         return False
 
-    if colin < -4 or colin > 7 or colout > 7 or colout < -4 or colout == 0: return False
+    if colin < -4 or colin > 7 or colout > 7 or colout < -4 or colout == 0: return "boog"
+    if colin < 1 and amount > 1: return "boog"
+
     #   0 = wastepile, -4 -> -1 = foundation, 1 -> 7 = tableau
     if colin == 0:  #    from the wastepile
-        if board.wastepile[-1] == Card:
+        if board.wastepile != []:
             cardin = board.wastepile.pop()
-        else: return False
+        else:
+            return "Sloog"
     if colin < 0:  #     from the foundation
-        cardin = board.foundation[abs(colin)-1].pop()
+        try:
+            cardin = board.foundation[abs(colin)-1].pop()
+        except: return "Slag"
     if colin > 0:  #     from the tableau
-        cardin = board.face[colin - 1].pop()
-
-    print(cardin)
-
-    if cardin.value == "K":
-        if board.face[colout-1] == []:
-            board.face[colout - 1].append(cardin)
-            return board
-        else: return False
-
-    elif board.face[colout-1] == []:
-            return False
+        try:
+            cardin = board.face[colin - 1].pop()
+        except: return "slonk"
 
     if colout > 0:
+        if cardin.value == "K":
+            if board.face[colout - 1] == []:
+                board.face[colout - 1].append(cardin)
+                return board
+            else:
+                return False
+        elif board.face[colout - 1] == []:
+            return False
+
         if IsCompatible(board.face[colout-1][-1], cardin):
             board.face[colout-1].append(cardin)
         else:
             return False
     if colout < 0:
-        if IsFoundationCompatible(board.foundation[abs(colout)-1][-1], cardin):
+        if IsFoundationCompatible(cardin, board.foundation[abs(colout)-1][-1]):
             board.foundation[abs(colout)-1].append(cardin)
         else:
             return False
@@ -133,6 +144,6 @@ def moveOne(board, colin, colout):
 # while True:
 #     board, deck = draw(board, deck)
 #     board = turn(board)
-#     board = moveOne(board)
+#     board = move(board)
 #     display(board)
 #     input(":")
