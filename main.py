@@ -50,12 +50,12 @@ def IsCompatible(Card1, Card2):
 
 def IsFoundationCompatible(Card1, Card2=0):
     if Card2 == 0:
-        if Card1.numvalue == 1:
+        if Card1.numvalue == 0:
             return True
         else:
             return False
 
-    if Card1.suit == Card2.suit and Card1.numvalue + 1 == Card2.numvalue:
+    if Card1.suit == Card2.suit and Card1.numvalue == Card2.numvalue + 1:
         return True
     else:
         return False
@@ -95,8 +95,28 @@ def draw(board):
 class EmptyWastepileException(Exception):
     pass
 
-
 class ColoutZeroException(Exception):
+    pass
+
+class ColinOutOfRangeException(Exception):
+    pass
+
+class ColoutOutOfRangeException(Exception):
+    pass
+
+class MultipleCardsNotFromTableauException(Exception):
+    pass
+
+class EmptySpaceNonKingException(Exception):
+    pass
+
+class NonEmptySpaceKingException(Exception):
+    pass
+
+class TableauCardsIncompatibleException(Exception):
+    pass
+
+class FoundationIncompatibleException(Exception):
     pass
 
 
@@ -105,13 +125,13 @@ def move(board, colin, colout, amount=1):
     colout = int(colout)
 
     if colin not in range(-4, 8):
-        return False
+        raise ColinOutOfRangeException
     if colout not in range(-4, 8):
-        return False
+        raise ColoutOutOfRangeException
     if colout == 0:
         raise ColoutZeroException()
     if colin < 1 < amount:
-        return False
+        raise MultipleCardsNotFromTableauException
 
     cardin = None
 
@@ -130,39 +150,29 @@ def move(board, colin, colout, amount=1):
 
     if colout > 0:
         if cardin.value != "K" and board.face[colout - 1] == []:
-            return False
+            raise EmptySpaceNonKingException
 
         if cardin.value == "K" and board.face[colout - 1] != []:
-            return False
+            raise NonEmptySpaceKingException
 
         if cardin.value == "K":
             board.face[colout - 1].append(cardin)
             return board
 
         if not IsCompatible(board.face[colout - 1][-1], cardin):
-            return False
+            raise TableauCardsIncompatibleException
 
         board.face[colout - 1].append(cardin)
 
     if colout < 0:
-
-        par = board.foundation[abs(colout) - 1][-1] if not board.foundation[abs(colout) - 1] else 0
+        try:
+            par = board.foundation[abs(colout) - 1][-1]
+        except:
+            par = 0
 
         if IsFoundationCompatible(cardin, par):
             board.foundation[abs(colout) - 1].append(cardin)
         else:
-            return str(cardin)
+            raise FoundationIncompatibleException
 
     return board
-
-# board = Board(CreateDeck())
-# board = turn(board)
-# display(board)
-# board= draw(board)
-
-# while True:
-#     board, deck = draw(board, deck)
-#     board = turn(board)
-#     board = move(board)
-#     display(board)
-#     input(":")

@@ -47,13 +47,20 @@ def test_move_fail(board):
     board = turn(board)
     with pytest.raises(ValueError):
         move(board, "lorem", "ipsum")
-    assert not move(board, 1, 50)
-    assert not move(board, -50, 1)
+    with pytest.raises(ColoutOutOfRangeException):
+        move(board, 1, 50)
+    with pytest.raises(ColinOutOfRangeException):
+        move(board, -50, 1)
     with pytest.raises(ColoutZeroException):
         move(board, 2, 0)
-    assert not move(board, 0, 1)
+    with pytest.raises(TableauCardsIncompatibleException):
+        move(board, 0, 1)
+
     board.face[0] = []
-    assert not move(board, 1, 2)
+    with pytest.raises(IndexError):
+        move(board, 1, 2)
+    with pytest.raises(EmptySpaceNonKingException):
+        move(board, 2, 1)
 
 def test_move(board):
     board = turn(board)
@@ -73,15 +80,23 @@ def test_move_wastepile(board):
     board = turn(board)
     board = draw(board)
     board = move(board, 0, 4)
-    assert board.face[3][-1].suit == "spades"
-    assert board.face[3][-1].value == "9"
+    assert (board.face[3][-1].suit == "spades"
+            and board.face[3][-1].value == "9")
 
 def test_move_foundation(board):
     for i in range(6):
         board = draw(board)
-    display(board)
     board = turn(board)
+
     board = move(board, 0, -4)
-    display(board)
-    assert board.foundation[3][-1].suit == "clubs"
-    assert board.foundation[3][-1].value == "A"
+    assert (board.foundation[3][-1].suit == "clubs"
+            and board.foundation[3][-1].value == "A")
+
+    board = move(board, 3, -3)
+    assert (board.foundation[2][-1].suit == "spades"
+            and board.foundation[2][-1].value == "A")
+
+    board.foundation[1] = [Card("A", "hearts")]
+    board = move(board, 7, -2)
+    assert (board.foundation[1][-1].suit == "hearts"
+            and board.foundation[1][-1].value == "2")
